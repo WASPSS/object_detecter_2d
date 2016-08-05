@@ -120,10 +120,10 @@ class object_detecter:
 
 					#Create a publisher 
 					obj_info_pub = object_loc()
-					obj_info_pub.data = 27 #ID for Circle need to be chnaged
-					obj_info_pub.x = trans_pt.point.x
-					obj_info_pub.y = trans_pt.point.y
-					obj_info_pub.z = trans_pt.point.z
+					obj_info_pub.ID = 27 #ID for Circle need to be chnaged
+					obj_info_pub.point.x = trans_pt.point.x
+					obj_info_pub.point.y = trans_pt.point.y
+					obj_info_pub.point.z = trans_pt.point.z
 
 					self.object_location_pub.publish(obj_info_pub)
 					#Height = 
