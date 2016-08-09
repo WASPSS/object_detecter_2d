@@ -17,8 +17,19 @@ import tf
 from std_msgs.msg import String
 from math import hypot
 
-def Longest_Length(approx_cont):
-	pass
+def Longest_Length(approxcontour):
+	approxcontour = np.concatenate((approxcontour,[approxcontour[0]]))
+	#print (approxcontour)
+	#formula to find difference between two points 
+	ptdiff = lambda (p1,p2): (p1[0]-p2[0], p1[1]-p2[1])
+	diffs = map(ptdiff, zip(approxcontour,approxcontour[1:]))
+	dist_ = []
+	for d in diffs:
+		dist_.append(hypot(*d))
+
+	#print ('dist ', dist_)
+	LongestSide = max(dist_)
+	return LongestSide
 
 
 
@@ -51,8 +62,6 @@ class object_detecter:
 		lower_green = np.array([60,60,46])	
 		upper_green = np.array([97,255,255])	
 
-
-
 		# Threshold the HSV image to get only blue colors
 		# mask1 = cv2.inRange(hsv, lower_red1, upper_red1)
 		# For the color used in testing only Upper threshold was sufficient, 
@@ -60,10 +69,8 @@ class object_detecter:
 		#mask2 = cv2.inRange(hsv, lower_blue, upper_blue)
 		#mask2 = cv2.inRange(hsv, lower_red2, upper_red2)
 		mask2 = cv2.inRange(hsv, lower_green, upper_green)
-
 		#imgthreshed = cv2.add(mask1,mask2)
 
-		#'''
 		contours, hierarchy = cv2.findContours(mask2,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
 
 		for x in range (len(contours)):
@@ -80,20 +87,8 @@ class object_detecter:
 					#print ('Length ', len(approxcontour))
 					cv2.drawContours(cv_image,[approxcontour],0,(0,255,255),2)
 					#print ('x : ',  boxcentrex, 'y : ', boxcentrey)
-					
 					approxcontour = approxcontour.reshape((4,2))
-					#adding the first element in end to find the distance between all coordinates
-					approxcontour = np.concatenate((approxcontour,[approxcontour[0]]))
-					#print (approxcontour)
-					#formula to find difference between two points 
-					ptdiff = lambda (p1,p2): (p1[0]-p2[0], p1[1]-p2[1])
-					diffs = map(ptdiff, zip(approxcontour,approxcontour[1:]))
-					dist_ = []
-					for d in diffs:
-						dist_.append(hypot(*d))
-
-					#print ('dist ', dist_)
-					LongestSide = max(dist_)
+					LongestSide = Longest_Length(approxcontour)
 					Distance = (focal_leng*11.5)/LongestSide #focal length x Actual Border width / size of Border in pixels
 					print ("Distance= " , Distance)
 
@@ -102,45 +97,24 @@ class object_detecter:
 					#print ('Length ', len(approxcontour))
 					cv2.drawContours(cv_image,[approxcontour],0,(0,255,255),2)
 					approxcontour = approxcontour.reshape((3,2))
-					#adding the first element in end to find the distance between all coordinates
-					approxcontour = np.concatenate((approxcontour,[approxcontour[0]]))
-					#print (approxcontour)
-					#formula to find difference between two points 
-					ptdiff = lambda (p1,p2): (p1[0]-p2[0], p1[1]-p2[1])
-					diffs = map(ptdiff, zip(approxcontour,approxcontour[1:]))
-					dist_ = []
-					for d in diffs:
-						dist_.append(hypot(*d))
-
-					#print ('dist ', dist_)
-					LongestSide = max(dist_)
+					LongestSide = Longest_Length(approxcontour)
 					Distance = (focal_leng*12.4)/LongestSide #focal length x Actual Border width / size of Border in pixels
 					print ("Distance= " , Distance)
+
 				#Check for Star
 				elif len(approxcontour) == 8:
-					#print ('Length ', len(approxcontour))
+					print ('Length ', len(approxcontour))
 					cv2.drawContours(cv_image,[approxcontour],0,(0,255,255),2)
 					approxcontour = approxcontour.reshape((8,2))
-					#adding the first element in end to find the distance between all coordinates
-					approxcontour = np.concatenate((approxcontour,[approxcontour[0]]))
-					#print (approxcontour)
-					#formula to find difference between two points 
-					ptdiff = lambda (p1,p2): (p1[0]-p2[0], p1[1]-p2[1])
-					diffs = map(ptdiff, zip(approxcontour,approxcontour[1:]))
-					dist_ = []
-					for d in diffs:
-						dist_.append(hypot(*d))
-
-					#print ('dist ', dist_)
-					LongestSide = max(dist_)
+					LongestSide = Longest_Length(approxcontour)
 					Distance = (focal_leng*5.5)/LongestSide #focal length x Actual Border width / size of Border in pixels
 					print ("Distance= " , Distance)	
+				#Move to next Contour
 				else :
 					continue
-					#Skip Loop and move to next contour
 
 		
-			#'''
+			'''
 				#Calculate Cordinates wrt to Camera, convert to Map
 				#Coordinates and publish message for storing 	
 				obj_cam_x = ((obj_x - 319.5)*Distance)/focal_leng
@@ -170,7 +144,7 @@ class object_detecter:
 
 		cv2.imshow("Image",np.hstack([img_cpy, cv_image]))
 		#cv2.imshow("Final Frame", hsv[:,:,0])
-		cv2.imshow("Gray", gray)
+		#cv2.imshow("Gray", gray)
 		#cv2.imshow("HSV", hsv)
 		
 		cv2.waitKey(1)
